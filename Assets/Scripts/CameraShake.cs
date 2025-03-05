@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class CameraShake : MonoBehaviour
 {
-    public float shakeDuration = 0.3f; // Duración total de la sacudida
-    public float shakeMagnitude = 0.2f; // Intensidad de la sacudida
-
+    private float shakeDuration = 0.3f; // Duración total de la sacudida
+    private float shakeMagnitude = 0.2f; // Intensidad de la sacudida
     private Vector3 originalPosition;
 
     void Start()

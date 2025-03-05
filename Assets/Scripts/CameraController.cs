@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public float sensitivity = 5f; // Sensibilidad del ratón
+    private float sensitivity = 5f; // Sensibilidad del ratón
     public Transform playerBody;   // Referencia al jugador
 
     private float xRotation = 0f; // Control de la rotación vertical

@@ -1,16 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 100; // Vida máxima
+    private int maxHealth = 100; // Vida máxima
     private int currentHealth; // Vida actual
     private CameraShake cameraShake;
+    public Image healthBarFill; // Referencia a la barra de vida
 
     void Start()
     {
         currentHealth = maxHealth; // Inicializar la vida al máximo
+        UpdateHealthUI();
         cameraShake = Camera.main.GetComponent<CameraShake>();
     }
 
@@ -23,11 +26,17 @@ public class PlayerHealth : MonoBehaviour
         {
             cameraShake.StartShake(); // Activa la animación de sacudida de la cámara
         }
+        UpdateHealthUI();
 
         if (currentHealth <= 0)
         {
             Die();
         }
+    }
+
+    void UpdateHealthUI()
+    {
+        healthBarFill.fillAmount = (float)currentHealth / maxHealth;
     }
 
     void Die()

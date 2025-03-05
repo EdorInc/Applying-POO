@@ -9,7 +9,7 @@ public class BlueEnemy : Enemy
     {
         base.Start(); // Llama al Start() de EnemyBase
         enemyName = "Blue Enemy";
-        health = 50;
+        health = 100;
         speed = 5f;
         damage = 10;
     }
