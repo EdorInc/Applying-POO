@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
@@ -16,12 +17,19 @@ public class Enemy : MonoBehaviour
     private PlayerHealth playerHealth;
     protected Rigidbody rb;
     protected Transform player; // Referencia al jugador
+    public Slider slider;
 
     // Start is called before the first frame update
     public virtual void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform; // Busca al jugador
         rb = GetComponent<Rigidbody>();
+        
+    }
+
+    public void SetHealth(int health)
+    {
+        slider.value = health;
     }
 
     void FixedUpdate()
@@ -150,7 +158,7 @@ public class Enemy : MonoBehaviour
     {
         health -= damageAmount;
         Debug.Log(enemyName + " recibió " + damageAmount + " de daño. Vida restante: " + health);
-
+        SetHealth(health);
         if (health <= 0)
         {
             Die();

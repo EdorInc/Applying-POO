@@ -18,6 +18,10 @@ public class BlackEnemy : Enemy
         health = 50;
         speed = 2.5f;
         attackRange = 20f;
+        if (firePoint == null)
+        {
+            firePoint = transform.Find("FirePoint");
+        }
     }
 
     void Update()
