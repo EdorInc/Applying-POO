@@ -1,35 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+// INHERITANCE
 public class Enemy : MonoBehaviour
 {
     [Header("Enemy Stats")]
     public string enemyName;
-    public int health;
-    public float speed;
-    public int damage;
-    public float damageCooldown = 1.5f;
-    public float attackRange = 1f; // Distancia para atacar con Raycast
-    public float pushForce = 5f; // Fuerza de empuje
-    public bool isTouchingPlayer = false;
+    public float attackRange = 1f;
+    public Slider healthBar;
+    public AudioSource audioSource;
+    public AudioClip explosionSound;
+    public int maxHealth;
+
+    private float damageCooldown = 1.5f;
+    private float pushForce = 5f;
+    private bool isTouchingPlayer = false;
     private PlayerHealth playerHealth;
     protected Rigidbody rb;
-    protected Transform player; // Referencia al jugador
-    public Slider slider;
+    protected Transform player;
+    private EnemyHealth enemyHealth; 
 
-    // Start is called before the first frame update
-    public virtual void Start()
+    protected float speed;
+    public float Speed  // ENCAPSULATION
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform; // Busca al jugador
-        rb = GetComponent<Rigidbody>();
-        
+        get { return speed; }
+        protected set { speed = Mathf.Max(0, value); }
     }
 
-    public void SetHealth(int health)
+    protected int damage;
+    public int Damage  // ENCAPSULATION
     {
-        slider.value = health;
+        get { return damage; }
+        protected set { damage = Mathf.Max(0, value); }
+    }
+
+    public virtual void Start()
+    {
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        rb = GetComponent<Rigidbody>();
+        enemyHealth = GetComponent<EnemyHealth>();
+
+        InitializeHealth();
+    }
+
+    protected virtual void InitializeHealth()
+    {
+        // Esto se sobrescribe en las subclases
     }
 
     void FixedUpdate()
@@ -42,9 +59,8 @@ public class Enemy : MonoBehaviour
     {
         if (player == null) return;
 
-        // Hacer que el enemigo siempre mire hacia el jugador
         Vector3 direction = (player.position - transform.position).normalized;
-        direction.y = 0; // Mantener nivelado en el eje Y
+        direction.y = 0;
 
         if (direction != Vector3.zero)
         {
@@ -53,45 +69,44 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public virtual void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
+
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log(enemyName + " golpeó al jugador.");
-
-            // Obtener el script de vida del jugador
             playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+
             if (playerHealth != null)
             {
                 playerHealth.TakeDamage(damage);
+
+                ApplyPushEffect(collision.collider);
 
                 if (!isTouchingPlayer)
                 {
                     isTouchingPlayer = true;
                     InvokeRepeating("ApplyContinuousDamage", damageCooldown, damageCooldown);
                 }
-
-                // Aplicar empuje solo una vez
-                ApplyPushEffect(collision.collider);
             }
         }
     }
+
 
     void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
             isTouchingPlayer = false;
-            CancelInvoke("ApplyContinuousDamage"); // Detiene el daño si el jugador escapa
+            CancelInvoke("ApplyContinuousDamage");
         }
     }
+
 
     void ApplyContinuousDamage()
     {
         if (isTouchingPlayer && playerHealth != null)
         {
             playerHealth.TakeDamage(damage);
-            Debug.Log(enemyName + " sigue haciendo daño al jugador.");
         }
     }
 
@@ -100,14 +115,12 @@ public class Enemy : MonoBehaviour
         if (player == null || isTouchingPlayer) return;
 
         Vector3 direction = (player.position - transform.position).normalized;
-        direction.y = 0; // No cambia la altura
+        direction.y = 0;
 
-        // Aceleración progresiva usando Lerp
         Vector3 targetVelocity = new Vector3(direction.x * speed, rb.velocity.y, direction.z * speed);
         rb.velocity = Vector3.Lerp(rb.velocity, targetVelocity, Time.fixedDeltaTime * 5f);
     }
 
-    // Verifica si el jugador está dentro del rango de ataque
     public virtual void CheckPlayerDistance()
     {
         if (player == null) return;
@@ -119,6 +132,14 @@ public class Enemy : MonoBehaviour
         {
             if (hit.collider.CompareTag("Player"))
             {
+
+                // Si el enemigo es BlackEnemy, solo detecta al jugador y NO aplica daÃ±o.
+                if (this is BlackEnemy)
+                {
+                    return;
+                }
+
+                // Si el enemigo es BlueEnemy, aplica daÃ±o si hay colisiÃ³n fÃ­sica.
                 if (!isTouchingPlayer)
                 {
                     isTouchingPlayer = true;
@@ -126,8 +147,7 @@ public class Enemy : MonoBehaviour
 
                     if (playerHealth != null)
                     {
-                        playerHealth.TakeDamage(damage);
-                        ApplyPushEffect(hit.collider); // Aplica empuje una sola vez
+                        ApplyPushEffect(hit.collider);
                         InvokeRepeating("ApplyContinuousDamage", damageCooldown, damageCooldown);
                     }
                 }
@@ -140,34 +160,34 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // Empuja al jugador solo una vez por golpe
+
     void ApplyPushEffect(Collider playerCollider)
     {
         Rigidbody playerRb = playerCollider.GetComponent<Rigidbody>();
         if (playerRb != null)
         {
             Vector3 pushDirection = (playerRb.transform.position - transform.position).normalized;
-            pushDirection.y = 0.2f; // Pequeño impulso hacia arriba
+            pushDirection.y = 0.2f;
 
             playerRb.AddForce(pushDirection * pushForce, ForceMode.Impulse);
         }
     }
 
-
-    public virtual void TakeDamage(int damageAmount)
+    public void TakeDamage(int damageAmount)
     {
-        health -= damageAmount;
-        Debug.Log(enemyName + " recibió " + damageAmount + " de daño. Vida restante: " + health);
-        SetHealth(health);
-        if (health <= 0)
+        if (enemyHealth != null)
         {
-            Die();
+            enemyHealth.TakeDamage(damageAmount);
         }
     }
 
     public virtual void Die()
     {
-        Debug.Log(enemyName + " ha muerto.");
+        GameObject tempAudio = new GameObject("TempAudio");
+        AudioSource tempAudioSource = tempAudio.AddComponent<AudioSource>();
+        tempAudioSource.clip = explosionSound;
+        tempAudioSource.Play();
+        Destroy(tempAudio, explosionSound.length);
         Destroy(gameObject);
     }
 }

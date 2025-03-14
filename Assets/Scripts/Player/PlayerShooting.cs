@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class PlayerShooting : MonoBehaviour
 {
-    public GameObject projectilePrefab; // Prefab de la pelota
-    public Transform firePoint; // Punto desde donde se disparan los proyectiles
-    private float projectileSpeed = 50f; // Velocidad del proyectil
-    private float fireRate = 0.1f; // Tiempo entre disparos
+    public PlayerProjectile projectilePrefab; 
+    public Transform firePoint; 
+    public AudioSource audioSource;
+    public AudioClip shootSound;
+    public static bool isMenuActive = false; 
 
+    private float projectileSpeed = 50f; 
+    private float fireRate = 0.1f; 
     private float nextFireTime = 0f;
 
     void Update()
     {
+        if (isMenuActive) return;
         if (Input.GetMouseButtonDown(0) && Time.time >= nextFireTime)
         {
             Shoot();
@@ -22,12 +26,17 @@ public class PlayerShooting : MonoBehaviour
 
     void Shoot()
     {
-        GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        PlayerProjectile projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
 
         if (rb != null)
         {
             rb.velocity = firePoint.forward * projectileSpeed;
+        }
+
+        if (audioSource != null && shootSound != null)
+        {
+            audioSource.PlayOneShot(shootSound);
         }
 
         // Ignorar colisión con el jugador

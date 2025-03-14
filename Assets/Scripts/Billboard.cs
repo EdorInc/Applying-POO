@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Billboard : MonoBehaviour
 {
-    public Transform camera;
+    public new Transform camera;
 
     // Update is called once per frame
     void LateUpdate()

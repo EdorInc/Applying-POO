@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     private float sensitivity = 5f; // Sensibilidad del ratón
-    public Transform playerBody;   // Referencia al jugador
+    public Transform orientation;   // Referencia al jugador
 
-    private float xRotation = 0f; // Control de la rotación vertical
+    private float xRotation;
+    private float yRotation;// Control de la rotación vertical
 
     // Start is called before the first frame update
     void Start()
@@ -21,13 +23,11 @@ public class CameraController : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * sensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
-        // Rotar el jugador en el eje Y (izquierda/derecha)
-        playerBody.Rotate(Vector3.up * mouseX);
-
-        // Rotar la cámara en el eje X (arriba/abajo)
+        yRotation += mouseX;
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // Limitar rotación para evitar voltear
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
+        orientation.rotation = Quaternion.Euler(0, yRotation, 0);
     }
 }

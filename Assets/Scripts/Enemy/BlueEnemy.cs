@@ -2,18 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// INHERITANCE
 public class BlueEnemy : Enemy
 {
-    // Start is called before the first frame update
     public override void Start()
     {
-        base.Start(); // Llama al Start() de EnemyBase
+        base.Start(); 
+
         enemyName = "Blue Enemy";
-        health = 100;
-        speed = 5f;
+        GetComponent<EnemyHealth>().InitializeHealth(150);
+        speed = 10f;
         damage = 10;
     }
 
+    // POLYMORPHISM
     public override void MoveTowardsPlayer()
     {
         base.MoveTowardsPlayer();
